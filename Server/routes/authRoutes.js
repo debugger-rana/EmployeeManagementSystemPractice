@@ -55,6 +55,33 @@ const protect = async (req, res, next) => {
   }
 };
 
+// Admin create user (no login token) - for admins to create other users
+router.post('/admin/create', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ success: false, message: 'Access denied. Admin only.' });
+    }
+
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email and password required' });
+    }
+
+    const existing = await User.findOne({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await User.create({ name, email, password: hashedPassword, role: role || 'Employee' });
+
+    res.json({ success: true, data: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  } catch (error) {
+    console.error('Admin create error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // Register user
 router.post('/register', async (req, res) => {
   try {

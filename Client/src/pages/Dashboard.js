@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import AdminOnly from '../components/AdminOnly';
 import '../components/dashboard.css';
 import {
@@ -21,8 +23,12 @@ import {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [attendance, setAttendance] = useState({ status: '-', time: null });
+  const [totalEmployees, setTotalEmployees] = useState(null);
+  const [totalAttendance, setTotalAttendance] = useState(null);
 
   useEffect(() => {
     // Simulate loading time for better UX
@@ -38,6 +44,70 @@ const Dashboard = () => {
       clearInterval(timeInterval);
     };
   }, []);
+
+  useEffect(() => {
+    // Fetch current user's attendance (so employees see it on dashboard)
+    let mounted = true;
+    const fetchAttendance = async () => {
+      try {
+        const res = await axios.get('/api/attendance/me');
+        if (!mounted) return;
+        const r = res.data.data || {};
+        setAttendance({ status: r.status || 'absent', time: r.time || null });
+      } catch (err) {
+        // ignore silently — attendance will show as '-'
+      }
+    };
+    fetchAttendance();
+    return () => { mounted = false };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    const fetchTotals = async () => {
+      try {
+        // Admins can request full data; non-admins get best-effort values.
+        if ((user.role || '').toLowerCase() === 'admin') {
+          const [usersRes, attendanceRes] = await Promise.all([
+            axios.get('/api/auth/users'),
+            axios.get('/api/attendance')
+          ]);
+          if (!mounted) return;
+          const users = usersRes.data.data || usersRes.data || [];
+          const employeesCount = users.filter(u => (u.role || '').toLowerCase() !== 'admin').length;
+          const attendanceList = attendanceRes.data.data || attendanceRes.data || [];
+          const presentCount = attendanceList.filter(a => (a.status || '').toLowerCase() === 'present').length;
+          setTotalEmployees(employeesCount);
+          setTotalAttendance(presentCount);
+        } else {
+          // Non-admin: try to get users count (may be forbidden) and use /me for attendance
+          try {
+            const usersRes = await axios.get('/api/auth/users');
+            if (!mounted) return;
+            const users = usersRes.data.data || usersRes.data || [];
+            setTotalEmployees(users.filter(u => (u.role || '').toLowerCase() !== 'admin').length);
+          } catch (e) {
+            setTotalEmployees(null);
+          }
+
+          try {
+            const meRes = await axios.get('/api/attendance/me');
+            if (!mounted) return;
+            const r = meRes.data.data || {};
+            setTotalAttendance((r.status || '').toLowerCase() === 'present' ? 1 : 0);
+          } catch (e) {
+            setTotalAttendance(null);
+          }
+        }
+      } catch (err) {
+        setTotalEmployees(null);
+        setTotalAttendance(null);
+      }
+    };
+    fetchTotals();
+    return () => { mounted = false };
+  }, [user]);
 
   if (!user) {
     return (
@@ -62,14 +132,14 @@ const Dashboard = () => {
       title: 'Add Employee',
       description: 'Register new team member',
       color: 'var(--gradient-primary)',
-      action: () => console.log('Add Employee')
+      action: () => navigate('/employees', { state: { openAdd: true } })
     },
     {
       icon: <FaCalendarAlt />,
       title: 'Mark Attendance',
       description: 'Record daily attendance',
       color: 'var(--gradient-secondary)',
-      action: () => console.log('Mark Attendance')
+      action: () => navigate('/attendance')
     },
     {
       icon: <FaEye />,
@@ -140,7 +210,7 @@ const Dashboard = () => {
             <FaUsers />
           </div>
           <div className="stat-title">Total Employees</div>
-          <div className="stat-value">1</div>
+          <div className="stat-value">{totalEmployees !== null ? totalEmployees : '-'}</div>
           <div className="stat-change positive">
             <span>↑ 12%</span> vs last month
           </div>
@@ -162,7 +232,7 @@ const Dashboard = () => {
             <FaCalendarCheck />
           </div>
           <div className="stat-title">Today's Attendance</div>
-          <div className="stat-value">0</div>
+          <div className="stat-value">{totalAttendance !== null ? totalAttendance : '-'}</div>
           <div className="stat-change">
             <span>Present Today</span>
           </div>
@@ -243,6 +313,14 @@ const Dashboard = () => {
               <div className="timeline-time">Role</div>
               <div className="timeline-content">
                 <span className="role-badge">{user.role}</span>
+              </div>
+            </div>
+            <div className="timeline-item">
+              <div className="timeline-time">Today's Attendance</div>
+              <div className="timeline-content">
+                <span className={`role-badge`} style={{ background: attendance.status === 'present' ? 'rgba(16,185,129,0.12)' : 'transparent', color: attendance.status === 'present' ? 'var(--success)' : 'var(--text-secondary)' }}>
+                  {attendance.status}{attendance.time ? ` — ${attendance.time}` : ''}
+                </span>
               </div>
             </div>
             <div className="timeline-item">

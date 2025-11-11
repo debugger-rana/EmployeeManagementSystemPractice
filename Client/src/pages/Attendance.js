@@ -1,20 +1,62 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AdminOnly from '../components/AdminOnly';
-
-const mockEmployees = [
-  { id: 1, name: 'John Doe', department: 'Engineering' },
-  { id: 2, name: 'Sarah Wilson', department: 'Marketing' },
-  { id: 3, name: 'Michael Brown', department: 'HR' },
-  { id: 4, name: 'Lisa Ray', department: 'Finance' },
-];
+import axios from 'axios';
 
 const Attendance = () => {
   const { user, isAdmin } = useAuth();
   const [query, setQuery] = useState('');
-  const [records, setRecords] = useState(() =>
-    mockEmployees.map((e) => ({ ...e, status: 'absent', time: null }))
-  );
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        if (isAdmin) {
+          const res = await axios.get('/api/attendance');
+          // Helpful debug — inspect shape returned by the server
+          console.debug('GET /api/attendance ->', res.data);
+
+          // res.data.data expected to be array of objects. Be defensive with field names.
+          const list = (res.data.data || []).map((r) => {
+            const uid = r.userId ?? r.user_id ?? (r.user && r.user.id) ?? r.id;
+            const name = r.name ?? r.Name ?? r.fullName ?? (r.user && r.user.name) ?? r.email ?? `User ${uid}`;
+            return {
+              id: uid,
+              name,
+              department: r.department ?? '-',
+              status: r.status ?? 'absent',
+              time: r.time ?? null,
+            };
+          });
+          if (mounted) setRecords(list);
+        } else {
+          const res = await axios.get('/api/attendance/me');
+          console.debug('GET /api/attendance/me ->', res.data);
+          const r = res.data.data || {};
+          const uid = r.userId ?? r.user_id ?? (r.user && r.user.id) ?? r.id;
+          const name = user?.name ?? user?.email ?? r.name ?? r.email ?? `User ${uid}`;
+          const item = {
+            id: uid,
+            name,
+            department: r.department ?? '-',
+            status: r.status ?? 'absent',
+            time: r.time ?? null,
+          };
+          if (mounted) setRecords([item]);
+        }
+      } catch (err) {
+        console.error('Failed to load attendance', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => { mounted = false };
+  }, [isAdmin, user]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -24,21 +66,17 @@ const Attendance = () => {
     );
   }, [query, records]);
 
-  const togglePresent = (id) => {
-    // Prevent non-admin users from toggling attendance on the client side.
+  const togglePresent = async (id) => {
     if (!isAdmin) return;
-
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: r.status === 'present' ? 'absent' : 'present',
-              time: r.status === 'present' ? null : new Date().toLocaleTimeString(),
-            }
-          : r
-      )
-    );
+    try {
+      const target = records.find((x) => x.id === id);
+      const newStatus = target?.status === 'present' ? 'absent' : 'present';
+      const res = await axios.patch(`/api/attendance/${id}`, { status: newStatus });
+      const updated = res.data.data;
+      setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, status: updated.status, time: updated.time } : r)));
+    } catch (err) {
+      console.error('Failed to update attendance', err);
+    }
   };
 
   const summary = useMemo(() => {
