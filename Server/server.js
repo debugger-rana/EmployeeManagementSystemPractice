@@ -8,6 +8,7 @@ const departmentRoutes = require('./routes/departmentRoutes');
 const cron = require('node-cron');
 const Attendance = require('./models/Attendance');
 const AttendanceHistory = require('./models/AttendanceHistory');
+const reportRoutes = require('./routes/reportRoutes');
 
 // Load env vars
 dotenv.config();
@@ -22,6 +23,8 @@ app.use(cors());
 connectDB();
 
 // Routes
+// Mount reports under /api/reports to match client requests
+app.use('/api/reports', reportRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/departments', departmentRoutes);
