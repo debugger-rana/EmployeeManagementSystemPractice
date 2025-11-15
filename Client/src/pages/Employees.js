@@ -1,8 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
+import AddEmployeeModal from '../components/AddEmployeeModal';
+import { useLocation } from 'react-router-dom';
 
 const Employees = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (location.state && location.state.openAdd) setOpen(true);
+  }, [location]);
+
+  const fetch = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/api/auth/users');
+      setList(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetch(); }, []);
+
+  const handleCreated = (u) => {
+    setList((s) => [u, ...s]);
+  };
 
   return (
     <div style={styles.container}>
@@ -12,42 +39,50 @@ const Employees = () => {
       </div>
 
       <div style={styles.card}>
-        <h2>Employee List</h2>
-        <p>Employee management features will be implemented here.</p>
-        <p><strong>Current Admin:</strong> {user?.name}</p>
-        
-        <div style={styles.placeholder}>
-          <p>📊 Employee CRUD operations coming soon...</p>
-          <p>👥 Add, edit, delete employees</p>
-          <p>📋 Assign to departments</p>
-          <p>👀 View employee details</p>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h2>Employee List</h2>
+          <div>
+            <button onClick={() => setOpen(true)} style={addBtn}>➕ Add Employee</button>
+          </div>
         </div>
+
+        {loading ? (
+          <div>Loading…</div>
+        ) : (
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr>
+                <th style={th}>Name</th>
+                <th style={th}>Email</th>
+                <th style={th}>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map(u => (
+                <tr key={u.id}>
+                  <td style={td}>{u.name}</td>
+                  <td style={td}>{u.email}</td>
+                  <td style={td}>{u.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <AddEmployeeModal open={open} onClose={() => setOpen(false)} onCreated={handleCreated} />
       </div>
     </div>
   );
 };
 
 const styles = {
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '40px 20px',
-  },
-  header: {
-    marginBottom: '30px',
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: '30px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  },
-  placeholder: {
-    textAlign: 'center',
-    padding: '40px',
-    color: '#666',
-    lineHeight: '1.8',
-  },
+  container: { maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' },
+  header: { marginBottom: '30px' },
+  card: { background: 'var(--glass-bg)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--glass-shadow)' },
 };
+
+const addBtn = { padding: '8px 12px', borderRadius:8, border:'none', background:'var(--gradient-primary)', color:'white', cursor:'pointer' };
+const th = { textAlign:'left', padding:12, color:'var(--text-secondary)' };
+const td = { padding:12, borderTop:'1px solid var(--border-light)' };
 
 export default Employees;

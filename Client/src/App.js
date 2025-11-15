@@ -10,6 +10,7 @@ import Departments from './pages/Departments';
 import Attendance from './pages/Attendance';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function AppContent() {
       {user && <Navbar />}
       <main style={user ? styles.mainWithNavbar : styles.mainWithoutNavbar}>
         <Routes>
+          <Route path="/reports" 
+          element={<Reports />} />
           <Route 
             path="/login" 
             element={!user ? <Login /> : <Navigate to="/dashboard" />} 
