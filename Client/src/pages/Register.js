@@ -58,6 +58,7 @@ const Register = () => {
           <h2 style={styles.title}>Create Account</h2>
           <p style={styles.subtitle}>Join EMS to get started</p>
         </div>
+        
 
         {/* Error Message */}
         {error && (
