@@ -54,7 +54,7 @@ router.get('/', protect, requireAdmin, async (req, res) => {
     const today = new Date().toISOString().slice(0, 10);
     const { sequelize } = require('../config/database');
     // Use LEFT JOIN to include all users even if they don't have an attendance row for today.
-    // If no attendance row exists, treat as not present (false).
+    // If no attendance row exists, treat as not present (0).
     const rows = await sequelize.query(
       `SELECT u.id AS userId, u.name, u.email, COALESCE(a.present, 0) AS present, a.time
        FROM users u
@@ -79,7 +79,7 @@ router.get('/', protect, requireAdmin, async (req, res) => {
   }
 });
 
-// Admin: mark present/absent for a user (use boolean `present` in request body)
+// Admin: mark present/absent for a user (expects { present: boolean })
 router.patch('/:userId', protect, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;

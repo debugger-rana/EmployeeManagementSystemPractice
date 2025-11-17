@@ -54,7 +54,6 @@ const Dashboard = () => {
         const res = await axios.get('/api/attendance/me');
         if (!mounted) return;
         const r = res.data.data || {};
-        // r.present expected to be boolean
         setAttendance({ present: typeof r.present === 'boolean' ? r.present : false, time: r.time || null });
       } catch (err) {
         // ignore silently — attendance will show as '-'
