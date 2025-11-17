@@ -27,7 +27,7 @@ const Attendance = () => {
               id: uid,
               name,
               department: r.department ?? '-',
-              status: r.status ?? 'absent',
+              present: r.present === true || r.present === 1,
               time: r.time ?? null,
             };
           });
@@ -42,7 +42,7 @@ const Attendance = () => {
             id: uid,
             name,
             department: r.department ?? '-',
-            status: r.status ?? 'absent',
+            present: r.present === true || r.present === 1,
             time: r.time ?? null,
           };
           if (mounted) setRecords([item]);
@@ -70,10 +70,10 @@ const Attendance = () => {
     if (!isAdmin) return;
     try {
       const target = records.find((x) => x.id === id);
-      const newStatus = target?.status === 'present' ? 'absent' : 'present';
-      const res = await axios.patch(`/api/attendance/${id}`, { status: newStatus });
+      const newPresent = !(target?.present === true);
+      const res = await axios.patch(`/api/attendance/${id}`, { present: newPresent });
       const updated = res.data.data;
-      setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, status: updated.status, time: updated.time } : r)));
+      setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, present: Boolean(updated.present), time: updated.time } : r)));
     } catch (err) {
       console.error('Failed to update attendance', err);
     }
@@ -81,7 +81,7 @@ const Attendance = () => {
 
   const summary = useMemo(() => {
     const total = records.length;
-    const present = records.filter((r) => r.status === 'present').length;
+    const present = records.filter((r) => r.present === true).length;
     const absent = total - present;
     return { total, present, absent };
   }, [records]);
@@ -147,8 +147,8 @@ const Attendance = () => {
                 <td style={styles.td}>{r.name}</td>
                 <td style={styles.td}>{r.department}</td>
                 <td style={styles.td}>
-                  <span style={r.status === 'present' ? styles.badgePresent : styles.badgeAbsent}>
-                    {r.status}
+                  <span style={r.present === true ? styles.badgePresent : styles.badgeAbsent}>
+                    {r.present === true ? 'Present' : 'Absent'}
                   </span>
                 </td>
                 <td style={styles.td}>{r.time || '-'}</td>
@@ -156,10 +156,10 @@ const Attendance = () => {
                   <AdminOnly disable>
                     <button
                       onClick={() => togglePresent(r.id)}
-                      style={r.status === 'present' ? styles.unmarkBtn : styles.markBtn}
-                      aria-pressed={r.status === 'present'}
+                      style={r.present === true ? styles.unmarkBtn : styles.markBtn}
+                      aria-pressed={r.present === true}
                     >
-                      {r.status === 'present' ? 'Unmark' : 'Mark Present'}
+                      {r.present === true ? 'Unmark' : 'Mark Present'}
                     </button>
                   </AdminOnly>
                 </td>

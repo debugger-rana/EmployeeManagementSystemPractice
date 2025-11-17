@@ -27,7 +27,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [attendance, setAttendance] = useState({ status: '-', time: null });
+  const [attendance, setAttendance] = useState({ present: null, time: null });
   const [totalEmployees, setTotalEmployees] = useState(null);
   const [totalAttendance, setTotalAttendance] = useState(null);
 
@@ -54,7 +54,8 @@ const Dashboard = () => {
         const res = await axios.get('/api/attendance/me');
         if (!mounted) return;
         const r = res.data.data || {};
-        setAttendance({ status: r.status || 'absent', time: r.time || null });
+        // r.present expected to be boolean
+        setAttendance({ present: typeof r.present === 'boolean' ? r.present : false, time: r.time || null });
       } catch (err) {
         // ignore silently — attendance will show as '-'
       }
@@ -78,7 +79,7 @@ const Dashboard = () => {
           const users = usersRes.data.data || usersRes.data || [];
           const employeesCount = users.filter(u => (u.role || '').toLowerCase() !== 'admin').length;
           const attendanceList = attendanceRes.data.data || attendanceRes.data || [];
-          const presentCount = attendanceList.filter(a => (a.status || '').toLowerCase() === 'present').length;
+          const presentCount = attendanceList.filter(a => a.present === true).length;
           setTotalEmployees(employeesCount);
           setTotalAttendance(presentCount);
         } else {
@@ -96,7 +97,7 @@ const Dashboard = () => {
             const meRes = await axios.get('/api/attendance/me');
             if (!mounted) return;
             const r = meRes.data.data || {};
-            setTotalAttendance((r.status || '').toLowerCase() === 'present' ? 1 : 0);
+            setTotalAttendance(r.present === true ? 1 : 0);
           } catch (e) {
             setTotalAttendance(null);
           }
