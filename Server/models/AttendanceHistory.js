@@ -6,8 +6,8 @@ const AttendanceHistory = sequelize.define('AttendanceHistory', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  status: {
-    type: DataTypes.STRING,
+  present: {
+    type: DataTypes.BOOLEAN,
     allowNull: false
   },
   time: {

@@ -34,8 +34,8 @@ exports.getMonthlyAttendanceReport = async (req, res) => {
     // SQL that aggregates present/absent counts per user within date range
     const sql = `
       SELECT u.id as userId, u.name,
-        COALESCE(SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END), 0) AS presentCount,
-        COALESCE(SUM(CASE WHEN a.status != 'present' AND a.status IS NOT NULL THEN 1 ELSE 0 END), 0) AS absentCount
+        COALESCE(SUM(CASE WHEN a.present = 1 THEN 1 ELSE 0 END), 0) AS presentCount,
+        COALESCE(SUM(CASE WHEN a.present = 0 AND a.present IS NOT NULL THEN 1 ELSE 0 END), 0) AS absentCount
       FROM users u
       LEFT JOIN attendance a
         ON a.userId = u.id AND a.date BETWEEN :start AND :end

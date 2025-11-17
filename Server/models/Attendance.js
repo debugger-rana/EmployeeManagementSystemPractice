@@ -6,10 +6,10 @@ const Attendance = sequelize.define('Attendance', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  status: {
-    type: DataTypes.STRING,
+  present: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: 'absent'
+    defaultValue: false
   },
   time: {
     type: DataTypes.STRING,

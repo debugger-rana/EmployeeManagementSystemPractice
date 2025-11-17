@@ -55,12 +55,12 @@ try {
     console.log('Running attendance rollover...');
     try {
       const today = new Date().toISOString().slice(0,10);
-      const presents = await Attendance.findAll({ where: { date: today, status: 'present' } });
+      const presents = await Attendance.findAll({ where: { date: today, present: true } });
       for (const p of presents) {
-        await AttendanceHistory.create({ userId: p.userId, status: 'present', time: p.time, date: p.date });
+        await AttendanceHistory.create({ userId: p.userId, present: true, time: p.time, date: p.date });
       }
-      // Reset or ensure attendance rows exist and are absent for next day
-      await Attendance.update({ status: 'absent', time: null }, { where: { date: today } });
+      // Reset or ensure attendance rows exist and mark not present for next day
+      await Attendance.update({ present: false, time: null }, { where: { date: today } });
       console.log('Attendance rollover complete.');
     } catch (err) {
       console.error('Rollover error:', err);

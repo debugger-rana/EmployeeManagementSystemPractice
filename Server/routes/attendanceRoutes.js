@@ -31,12 +31,12 @@ router.get('/me', protect, async (req, res) => {
     const today = new Date().toISOString().slice(0, 10);
     let record = await Attendance.findOne({ where: { userId: req.user.id, date: today } });
     if (!record) {
-      record = await Attendance.create({ userId: req.user.id, status: 'absent', date: today });
+      record = await Attendance.create({ userId: req.user.id, present: false, date: today });
     }
     // Return attendance plus user's name/email so client can render reliably
     res.json({ success: true, data: {
       userId: record.userId,
-      status: record.status,
+      present: record.present,
       time: record.time,
       date: record.date,
       name: req.user.name,
@@ -54,9 +54,9 @@ router.get('/', protect, requireAdmin, async (req, res) => {
     const today = new Date().toISOString().slice(0, 10);
     const { sequelize } = require('../config/database');
     // Use LEFT JOIN to include all users even if they don't have an attendance row for today.
-    // If no attendance row exists, status will be NULL; coalesce to 'absent'.
+    // If no attendance row exists, treat as not present (false).
     const rows = await sequelize.query(
-      `SELECT u.id AS userId, u.name, u.email, COALESCE(a.status, 'absent') AS status, a.time
+      `SELECT u.id AS userId, u.name, u.email, COALESCE(a.present, 0) AS present, a.time
        FROM users u
        LEFT JOIN attendance a ON a.userId = u.id AND a.date = :today
        ORDER BY u.name ASC`,
@@ -68,7 +68,7 @@ router.get('/', protect, requireAdmin, async (req, res) => {
       userId: r.userId ?? r.id,
       name: r.name ?? null,
       email: r.email ?? null,
-      status: r.status ?? 'absent',
+      present: Boolean(r.present),
       time: r.time ?? null
     }));
 
@@ -79,19 +79,19 @@ router.get('/', protect, requireAdmin, async (req, res) => {
   }
 });
 
-// Admin: mark present/absent for a user
+// Admin: mark present/absent for a user (use boolean `present` in request body)
 router.patch('/:userId', protect, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { status } = req.body; // 'present' or 'absent'
-    if (!['present', 'absent'].includes(status)) return res.status(400).json({ success: false, message: 'Invalid status' });
+    const { present } = req.body; // boolean
+    if (typeof present !== 'boolean') return res.status(400).json({ success: false, message: 'Invalid present flag; expected boolean' });
     const today = new Date().toISOString().slice(0, 10);
     let record = await Attendance.findOne({ where: { userId, date: today } });
-    const time = status === 'present' ? new Date().toLocaleTimeString() : null;
+    const time = present ? new Date().toLocaleTimeString() : null;
     if (!record) {
-      record = await Attendance.create({ userId, status, time, date: today });
+      record = await Attendance.create({ userId, present, time, date: today });
     } else {
-      record.status = status;
+      record.present = present;
       record.time = time;
       await record.save();
     }
@@ -99,7 +99,7 @@ router.patch('/:userId', protect, requireAdmin, async (req, res) => {
     const user = await User.findByPk(userId);
     res.json({ success: true, data: {
       userId: record.userId,
-      status: record.status,
+      present: Boolean(record.present),
       time: record.time,
       date: record.date,
       name: user ? user.name : null,
