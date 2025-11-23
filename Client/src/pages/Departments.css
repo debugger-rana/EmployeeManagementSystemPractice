@@ -1,0 +1,537 @@
+/* Departments Page Styles */
+
+.departments-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+/* Floating Background */
+.departments-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.departments-bg-shape {
+  position: absolute;
+  opacity: 0.03;
+  animation: floatAround 22s ease-in-out infinite;
+}
+
+.departments-bg-shape:nth-child(1) {
+  width: 320px;
+  height: 320px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  top: 15%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.departments-bg-shape:nth-child(2) {
+  width: 250px;
+  height: 250px;
+  background: var(--primary-color);
+  border-radius: 45% 55% 60% 40% / 50% 55% 45% 50%;
+  bottom: 15%;
+  right: 10%;
+  animation-delay: -6s;
+}
+
+/* Header Section */
+.departments-header {
+  margin-bottom: 40px;
+  animation: fadeInDown 0.6s ease-out;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.departments-header > div:first-child {
+  flex: 1;
+}
+
+.departments-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 12px 0;
+  animation: gradientShift 3s ease infinite;
+}
+
+.departments-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.2s forwards;
+}
+
+/* Main Card */
+.departments-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--glass-shadow);
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+  transition: all 0.3s ease;
+}
+
+.departments-card:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Card Header */
+.departments-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.departments-card-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.departments-card-title-icon {
+  font-size: 1.5rem;
+  color: var(--accent-color);
+  animation: bounce 2s ease-in-out infinite;
+}
+
+/* Add Button */
+.departments-add-btn {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.departments-add-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.departments-add-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.departments-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4);
+}
+
+.departments-add-btn:active {
+  transform: translateY(0);
+}
+
+.departments-add-icon {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.departments-add-btn:hover .departments-add-icon {
+  transform: rotate(90deg);
+}
+
+/* Loading State */
+.departments-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  animation: fadeIn 0.3s ease;
+}
+
+.departments-loading-spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 24px;
+  border: 4px solid rgba(255, 107, 107, 0.1);
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Table Wrapper */
+.departments-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  animation: fadeInUp 0.6s ease-out 0.4s backwards;
+}
+
+/* Table Styles */
+.departments-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.departments-table thead {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.departments-table th {
+  text-align: left;
+  padding: 18px 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--glass-border);
+  white-space: nowrap;
+}
+
+.departments-table tbody tr {
+  transition: all 0.3s ease;
+  animation: slideInRight 0.4s ease-out backwards;
+  animation-delay: calc(var(--row-index) * 0.05s);
+}
+
+.departments-table tbody tr:hover {
+  background: rgba(255, 107, 107, 0.05);
+  transform: translateX(-4px);
+}
+
+.departments-table td {
+  padding: 20px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.departments-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Department Name with Icon */
+.department-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.department-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+}
+
+.departments-table tbody tr:hover .department-icon {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+}
+
+.department-name-text {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Department Code Badge */
+.department-code {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.department-code:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+/* Employee Count Badge */
+.department-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--secondary-color);
+  transition: all 0.3s ease;
+}
+
+.department-count-icon {
+  font-size: 16px;
+}
+
+.department-count:hover {
+  transform: scale(1.05);
+  background: rgba(6, 182, 212, 0.2);
+}
+
+/* Action Buttons */
+.department-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.department-action-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.department-action-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.department-action-btn.edit {
+  border-color: rgba(124, 58, 237, 0.3);
+  color: var(--primary-color);
+}
+
+.department-action-btn.edit:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: var(--primary-color);
+}
+
+.department-action-btn.delete {
+  border-color: rgba(255, 107, 107, 0.3);
+  color: var(--accent-color);
+}
+
+.department-action-btn.delete:hover {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: var(--accent-color);
+}
+
+.department-action-icon {
+  font-size: 16px;
+}
+
+/* Empty State */
+.departments-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  animation: fadeIn 0.6s ease;
+}
+
+.departments-empty-icon {
+  font-size: 64px;
+  opacity: 0.3;
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.departments-empty h3 {
+  font-size: 1.5rem;
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+}
+
+.departments-empty p {
+  margin: 0 0 24px 0;
+  color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .departments-page {
+    padding: 32px 16px;
+  }
+
+  .departments-header h1 {
+    font-size: 2rem;
+  }
+
+  .departments-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .departments-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .departments-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .departments-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .departments-table th,
+  .departments-table td {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+
+  .department-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .department-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .department-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .departments-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .departments-card {
+    padding: 20px;
+  }
+
+  .departments-table {
+    font-size: 13px;
+  }
+
+  .department-name-cell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes floatAround {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-80px, 60px) rotate(120deg); }
+  66% { transform: translate(60px, -80px) rotate(240deg); }
+}

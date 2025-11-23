@@ -422,6 +422,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AnimatedBackground from '../components/AnimatedBackground';
+import './Auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -430,7 +432,7 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [focusedField, setFocusedField] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -440,6 +442,7 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    if (error) setError(''); // Clear error when typing
   };
 
   const handleSubmit = async (e) => {
@@ -459,41 +462,37 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Enhanced Animated Background Elements */}
-      <div style={styles.circle1}></div>
-      <div style={styles.circle2}></div>
-      <div style={styles.circle3}></div>
-      <div style={styles.circle4}></div>
-      <div style={styles.floatingParticles}>
-        {[...Array(12)].map((_, i) => (
-          <div key={i} style={styles.particle(i)}></div>
-        ))}
-      </div>
+    <div className="auth-container">
+      <AnimatedBackground variant="login" />
       
-      <div style={styles.card}>
-        {/* Animated Gradient Top Bar */}
-        <div style={styles.gradientBar}></div>
+      <div className="auth-card">
+        <div className="gradient-bar"></div>
         
-        {/* Enhanced Header Section - Logo Removed */}
-        <div style={styles.header}>
-          <h2 style={styles.title}>Welcome Back</h2>
-          <p style={styles.subtitle}>Sign in to your EMS account</p>
+        <div className="logo-container">
+          <div className="auth-logo">EMS</div>
+        </div>
+        
+        <div className="auth-header">
+          <h2 className="auth-title">Welcome Back</h2>
+          <p className="auth-subtitle">Sign in to continue to your dashboard</p>
         </div>
 
-        {/* Error Message */}
         {error && (
-          <div style={styles.error}>
-            <span style={styles.errorIcon}>⚠</span>
-            {error}
+          <div className="alert alert-error">
+            <svg className="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+            </svg>
+            <span>{error}</span>
           </div>
         )}
 
-        {/* Enhanced Form Section */}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>
-              <span style={styles.labelIcon}>✉</span>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label className="form-label">
+              <svg className="label-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+              </svg>
               Email Address
             </label>
             <input
@@ -501,450 +500,75 @@ const Login = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              onFocus={() => setFocusedField('email')}
-              onBlur={() => setFocusedField(null)}
               required
-              style={{
-                ...styles.input,
-                ...(focusedField === 'email' ? styles.inputFocus : {})
-              }}
-              placeholder="Enter your email"
+              className="form-input"
+              placeholder="name@company.com"
+              autoComplete="email"
             />
           </div>
 
-          <div style={styles.formGroup}>
-            <div style={styles.labelContainer}>
-              <label style={styles.label}>
-                <span style={styles.labelIcon}>🔒</span>
+          <div className="form-group">
+            <div className="label-row">
+              <label className="form-label">
+                <svg className="label-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
+                </svg>
                 Password
               </label>
-              <Link to="/forgot-password" style={styles.forgotLink}>
-                Forgot password?
-              </Link>
+              <Link to="/forgot-password" className="forgot-link">Forgot?</Link>
             </div>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              onFocus={() => setFocusedField('password')}
-              onBlur={() => setFocusedField(null)}
-              required
-              style={{
-                ...styles.input,
-                ...(focusedField === 'password' ? styles.inputFocus : {})
-              }}
-              placeholder="Enter your password"
-            />
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="form-input"
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
           <button 
             type="submit"
-            style={{
-              ...styles.button,
-              ...(loading ? styles.buttonDisabled : {})
-            }}
+            className={`submit-button ${loading ? 'loading' : ''}`}
             disabled={loading}
           >
             {loading ? (
-              <div style={styles.buttonContent}>
-                <div style={styles.spinner}></div>
-                Signing in...
-              </div>
+              <>
+                <span className="spinner"></span>
+                Signing In...
+              </>
             ) : (
-              <div style={styles.buttonContent}>
+              <>
                 Sign In
-                <span style={styles.buttonArrow}>→</span>
-              </div>
+                <svg className="button-arrow" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
+              </>
             )}
           </button>
         </form>
 
-        {/* Enhanced Footer Section */}
-        <div style={styles.footer}>
-          <div style={styles.divider}>
-            <span style={styles.dividerText}>New to EMS?</span>
-          </div>
-          <p style={styles.footerText}>
+        <div className="auth-footer">
+          <p className="footer-text">
             Don't have an account?{' '}
-            <Link to="/register" style={styles.registerLink}>
-              Create account
-            </Link>
+            <Link to="/register" className="footer-link">Create one now</Link>
           </p>
         </div>
       </div>
-
-      {/* Enhanced CSS */}
-      <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        body, html, #root {
-          height: 100%;
-          overflow: hidden;
-          background: #0f172a;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        @keyframes glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-          50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
-        }
-        @keyframes particleFloat {
-          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0.7; }
-          33% { transform: translateY(-30px) translateX(10px) rotate(120deg); opacity: 0.4; }
-          66% { transform: translateY(20px) translateX(-15px) rotate(240deg); opacity: 0.8; }
-        }
-        @keyframes slideIn {
-          0% { opacity: 0; transform: translateY(30px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        button:hover:not(:disabled) .buttonArrow {
-          transform: translateX(3px);
-        }
-        
-        button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 15px 35px rgba(59,130,246,0.25);
-        }
-      `}</style>
     </div>
   );
 };
-
-const styles = {
-  container: {
-    height: '100vh',
-    width: '100vw',
-    background: 'linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569)',
-    backgroundSize: '400% 400%',
-    animation: 'gradientShift 15s ease infinite',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '20px',
-    fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
-  },
-  // Enhanced background elements
-  circle1: {
-    position: 'absolute',
-    width: '400px',
-    height: '400px',
-    background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)',
-    borderRadius: '50%',
-    top: '5%',
-    left: '5%',
-    animation: 'float 8s ease-in-out infinite, pulse 6s ease-in-out infinite alternate',
-    filter: 'blur(20px)',
-  },
-  circle2: {
-    position: 'absolute',
-    width: '350px',
-    height: '350px',
-    background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
-    borderRadius: '50%',
-    bottom: '10%',
-    right: '10%',
-    animation: 'float 10s ease-in-out infinite reverse, pulse 4s ease-in-out infinite alternate',
-    filter: 'blur(25px)',
-  },
-  circle3: {
-    position: 'absolute',
-    width: '250px',
-    height: '250px',
-    background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)',
-    borderRadius: '50%',
-    top: '60%',
-    left: '75%',
-    animation: 'float 12s ease-in-out infinite, pulse 5s ease-in-out infinite alternate',
-    filter: 'blur(15px)',
-  },
-  circle4: {
-    position: 'absolute',
-    width: '200px',
-    height: '200px',
-    background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)',
-    borderRadius: '50%',
-    top: '20%',
-    right: '20%',
-    animation: 'float 9s ease-in-out infinite reverse, pulse 7s ease-in-out infinite alternate',
-    filter: 'blur(20px)',
-  },
-  floatingParticles: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none',
-  },
-  particle: (i) => ({
-    position: 'absolute',
-    width: `${Math.random() * 6 + 2}px`,
-    height: `${Math.random() * 6 + 2}px`,
-    background: `rgba(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255, ${Math.random() * 0.3 + 0.2})`,
-    borderRadius: '50%',
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    animation: `particleFloat ${Math.random() * 20 + 10}s ease-in-out infinite`,
-    animationDelay: `${i * 0.5}s`,
-  }),
-  card: {
-    background: 'rgba(15, 23, 42, 0.8)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    padding: '40px',
-    borderRadius: '24px',
-    boxShadow: `
-      0 25px 50px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1)
-    `,
-    width: '440px',
-    maxWidth: '90vw',
-    maxHeight: '90vh',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    overflow: 'hidden',
-    animation: 'slideIn 0.8s ease-out',
-    transition: 'all 0.3s ease',
-  },
-  gradientBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '4px',
-    background: 'linear-gradient(90deg, #667eea, #764ba2, #667eea)',
-    backgroundSize: '200% 100%',
-    animation: 'gradientShift 3s ease infinite',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: '32px',
-    paddingTop: '10px', // Added padding to compensate for removed logo
-  },
-  title: {
-    fontSize: '32px', // Slightly larger to compensate for removed logo
-    fontWeight: '800',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    margin: '0 0 12px 0',
-    letterSpacing: '-0.5px',
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#94a3b8',
-    margin: 0,
-    fontWeight: '400',
-    letterSpacing: '0.2px',
-  },
-  form: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-    minHeight: '0',
-  },
-  formGroup: {
-    position: 'relative',
-  },
-  labelContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '10px',
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#e2e8f0',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    letterSpacing: '0.3px',
-  },
-  labelIcon: {
-    fontSize: '16px',
-    opacity: 0.8,
-  },
-  input: {
-    width: '100%',
-    padding: '16px 18px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '14px',
-    fontSize: '15px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    backgroundColor: 'rgba(30, 41, 59, 0.6)',
-    color: '#f1f5f9',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-    backdropFilter: 'blur(10px)',
-  },
-  inputFocus: {
-    borderColor: '#667eea',
-    backgroundColor: 'rgba(30, 41, 59, 0.9)',
-    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)',
-    outline: 'none',
-    transform: 'translateY(-2px)',
-  },
-  button: {
-    width: '100%',
-    padding: '16px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '14px',
-    fontSize: '16px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    marginTop: '12px',
-    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
-    letterSpacing: '0.5px',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-    cursor: 'not-allowed',
-    transform: 'none',
-  },
-  buttonContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '10px',
-    position: 'relative',
-    zIndex: 2,
-  },
-  buttonArrow: {
-    fontSize: '18px',
-    transition: 'transform 0.3s ease',
-  },
-  spinner: {
-    width: '20px',
-    height: '20px',
-    border: '2px solid transparent',
-    borderTop: '2px solid white',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  error: {
-    color: '#f87171',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    border: '1px solid rgba(239, 68, 68, 0.3)',
-    padding: '14px 16px',
-    borderRadius: '12px',
-    marginBottom: '20px',
-    fontSize: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    backdropFilter: 'blur(10px)',
-    animation: 'slideIn 0.4s ease-out',
-  },
-  errorIcon: {
-    fontSize: '16px',
-  },
-  forgotLink: {
-    fontSize: '13px',
-    color: '#667eea',
-    textDecoration: 'none',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-  },
-  footer: {
-    textAlign: 'center',
-    marginTop: '28px',
-    paddingTop: '24px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-  },
-  divider: {
-    position: 'relative',
-    marginBottom: '20px',
-  },
-  dividerText: {
-    display: 'inline-block',
-    padding: '0 16px',
-    backgroundColor: 'rgba(15, 23, 42, 0.8)',
-    color: '#94a3b8',
-    fontSize: '13px',
-    fontWeight: '500',
-    letterSpacing: '0.5px',
-  },
-  footerText: {
-    fontSize: '14px',
-    color: '#94a3b8',
-    margin: 0,
-    letterSpacing: '0.2px',
-  },
-  registerLink: {
-    color: '#667eea',
-    textDecoration: 'none',
-    fontWeight: '700',
-    transition: 'all 0.3s ease',
-    position: 'relative',
-  },
-};
-
-// Add hover effects
-const styleElement = document.createElement('style');
-styleElement.textContent = `
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-  .card-hover:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 35px 60px rgba(0, 0, 0, 0.3);
-  }
-  
-  button:hover:not(:disabled)::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-  
-  button:hover:not(:disabled)::before {
-    left: 100%;
-  }
-  
-  .forgot-link:hover, .register-link:hover {
-    color: #a855f7;
-    transform: translateY(-1px);
-  }
-`;
-document.head.appendChild(styleElement);
 
 export default Login;
